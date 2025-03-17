@@ -11,6 +11,7 @@ def handler(event):
     input = event['input']
     image = input.get('image')
     HF_API_KEY = input.get('hf_api')
+    assistant_start = "<|start_header_id|>assistant<|end_header_id>"
 
     if HF_API_KEY:
         login(token=HF_API_KEY)
@@ -43,12 +44,29 @@ def handler(event):
         add_special_tokens=False,
         return_tensors="pt"
     ).to(model.device)
-    output = model.generate(**inputs, max_new_tokens=512)
-    full_output = processor.decode(output[0], skip_special_tokens=True)
+    output = model.generate(**inputs, max_new_tokens=1024)
+    responce = clean_responce(processor.decode(output[0]))
+    return responce
 
-    input_length = len(input_text)
-    generated_text = full_output[input_length:].strip()
-    return generated_text 
+
+def clean_responce(text):
+    assistant_start = "<|start_header_id|>assistant<|end_header_id|>"  # Marks the start of the response
+    assistant_end = "<|eot_id|>"
+    request_end = "<|eot_id|>"
+    if assistant_start in text:
+        response_part = text.split(assistant_start, 1)[1]
+        if assistant_end in response_part:
+            clean_response = response_part.split(assistant_end, 1)[0].strip()
+        else:
+            clean_response = response_part.strip()
+    elif request_end in text:
+        # Fallback: if assistant_start is missing, try splitting after request_end
+        clean_response = text.split(request_end, 1)[1].strip()
+    else:
+        # Last resort: return trimmed output if no markers are found
+        clean_response = text.strip()
+    
+    return clean_response
 
 
 if __name__ == '__main__':
