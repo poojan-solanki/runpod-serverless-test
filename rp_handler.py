@@ -11,7 +11,6 @@ def handler(event):
     input = event['input']
     image = input.get('image')
     HF_API_KEY = input.get('hf_api')
-    assistant_start = "<|start_header_id|>assistant<|end_header_id>"
 
     if HF_API_KEY:
         login(token=HF_API_KEY)
@@ -51,8 +50,7 @@ def handler(event):
 
 def clean_responce(text):
     assistant_start = "<|start_header_id|>assistant<|end_header_id|>"  # Marks the start of the response
-    assistant_end = "<|eot_id|>"
-    request_end = "<|eot_id|>"
+    assistant_end = request_end = "<|eot_id|>"
     if assistant_start in text:
         response_part = text.split(assistant_start, 1)[1]
         if assistant_end in response_part:
