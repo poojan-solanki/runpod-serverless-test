@@ -22,14 +22,8 @@ messages = [
 ]
 
 def handler(event):
-    input = event['input']
-    image = input.get('image')
-    HF_API_KEY = input.get('hf_api')
+    image = event['input'].get('image')
 
-    if HF_API_KEY:
-        login(token=HF_API_KEY)
-    else:
-        raise ValueError("Hugging Face API key is missing. Set HF_API_KEY as an environment variable.")
     #Make string to pillow image
     # b64decode will make it in bytes b'jdhkfghfh' format
     # BytesIO will
